@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mindful Flow:Tracker</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
-    // New calming color theme: Deep Blue/Teal
+    // New calming color theme: Deep Blue/Teal (Colors retained from original)
     tailwind.config = {
         theme: {
             extend: {
                 colors: {
                     'primary': '#008080', // Teal
-                    'primary-dark': '#005f5f', // Dark Teal/Cyan
+                    'primary-dark': '#005f5f', // Dark Teal/Cyan (Used for counts/emphasis)
                     'primary-light': '#00a0a0', // Light Teal
                     'bg-light': '#f0f9ff', // Very light blue background
                     'card-light': '#ffffff',
@@ -32,19 +32,47 @@
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 
 <style>
+/* MODIFICATION 2: Set root elements to use the full viewport */
+html {
+    height: 100%;
+    /* Disable bounce scroll effect in some browsers */
+    overflow: hidden; 
+}
+
 body {
-    min-height: 100vh;
+    /* Use 100% of the viewport height */
+    height: 100%; 
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     background-color: #f0f9ff;
-    color: #1a1a1a;
+    color: #000000;
     font-size: 1.125rem; 
+    
+    /* Ensure no unwanted scrolling on the body */
+    overflow: hidden; 
+}
+
+/* MODIFICATION 3: Apply safe area insets to header */
+header {
+    /* Padding for the top status bar/notch */
+    padding-top: calc(1rem + env(safe-area-inset-top)); 
+    padding-bottom: 1rem;
+}
+
+/* MODIFICATION 4: Make main content scrollable and manage layout */
+main {
+    flex-grow: 1;
+    overflow-y: auto; /* Allows content within main to scroll */
+    -webkit-overflow-scrolling: touch; /* Improved scrolling on iOS */
+    padding-bottom: 5rem; /* Ensure space above the fixed nav */
 }
 
 section {
     display: none;
     flex: 1;
-    margin-bottom: 70px;
+    /* Removed the old margin-bottom since main has padding-bottom */
+    /* margin-bottom: 70px; */ 
     min-height: 100%;
 }
 section.active {
@@ -55,7 +83,7 @@ section.active {
 
 .pulse {
     transform: scale(1.1);
-    color: theme('colors.pink.500'); /* Changed pulse color for contrast */
+    color: theme('colors.pink.500'); 
     text-shadow: 2px 2px 8px rgba(0, 128, 128, 0.5);
 }
 
@@ -79,27 +107,36 @@ section.active {
 .tox-tinymce {
     z-index: 99999 !important;
 }
+
+/* MODIFICATION 5: Fixed bottom nav needs bottom safe area inset */
+nav {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)) !important; 
+}
+
+/* Ensure sections in main use available space, especially for notes */
+#notes-list {
+    flex-grow: 1;
+}
 </style>
 </head>
-<body class="bg-bg-light text-gray-800 font-sans transition-colors duration-300">
+<body class="bg-bg-light font-sans transition-colors duration-300">
 
-<header class="bg-primary text-white text-center py-4 text-2xl font-semibold relative shadow-lg">
-   Mindful Flow:Tracker
+<header class="bg-primary text-white text-2xl font-semibold relative shadow-lg px-4">
+    Mindful Flow:Tracker
 </header>
 
 <main class="flex-grow p-4">
-
 <section id="home" class="active">
-<h3 class="text-xl font-bold text-gray-700 mt-0 mb-3 border-l-4 border-pink-500 pl-3">Today's Progress</h3>
+<h3 class="text-xl font-bold text-black mt-0 mb-3 border-l-4 border-pink-500 pl-3">Today's Progress</h3>
 <div class="dashboard-list bg-white rounded-xl shadow-lg divide-y divide-gray-200 overflow-hidden mb-6">
     
     <div class="dashboard-list-item">
-        <div class="text-lg font-medium text-gray-700">Daily Japa Count</div>
+        <div class="text-lg font-medium text-black">Daily Japa Count</div>
         <p id="dailyJapa" class="text-lg font-extrabold text-primary-dark">0 times</p>
     </div>
     
     <div class="dashboard-list-item">
-        <div class="text-lg font-medium text-gray-700">Daily Meditation Time</div>
+        <div class="text-lg font-medium text-black">Daily Meditation Time</div>
         <p id="dailyMeditation" class="text-lg font-extrabold text-primary-dark">0 mins</p>
     </div>
     
@@ -107,21 +144,21 @@ section.active {
 
 <div class="mb-6"><hr class="border-gray-300"></div>
 
-<h3 class="text-xl font-bold text-gray-700 mt-4 mb-3 border-l-4 border-primary pl-3">Cumulative Records</h3>
+<h3 class="text-xl font-bold text-black mt-4 mb-3 border-l-4 border-primary pl-3">Cumulative Records</h3>
 <div class="dashboard-list bg-white rounded-xl shadow-lg divide-y divide-gray-200 overflow-hidden">
     
     <div class="dashboard-list-item">
-        <div class="text-lg font-medium text-gray-700">Total Japa Completed</div>
+        <div class="text-lg font-medium text-black">Total Japa Completed</div>
         <p id="totalJapa" class="text-lg font-extrabold text-primary-dark">0 times</p>
     </div>
     
     <div class="dashboard-list-item">
-        <div class="text-lg font-medium text-gray-700">Total Meditation Time</div>
+        <div class="text-lg font-medium text-black">Total Meditation Time</div>
         <p id="totalMeditation" class="text-lg font-extrabold text-primary-dark">0 mins</p>
     </div>
     
     <div class="dashboard-list-item">
-        <div class="text-lg font-medium text-gray-700">Total Saved Notes</div>
+        <div class="text-lg font-medium text-black">Total Saved Notes</div>
         <p id="notesCount" class="text-lg font-extrabold text-primary-dark">0 notes</p>
     </div>
     
@@ -130,27 +167,27 @@ section.active {
 </section>
 
 <section id="japa">
-<h3 class="text-xl font-bold text-center text-primary mb-6">Japa (Mantra Counting)</h3>
-<div class="mb-4 text-gray-700 text-lg flex justify-center items-center">
+<h3 class="text-xl font-bold text-black mb-6">Japa (Mantra Counting)</h3>
+<div class="mb-4 text-black text-lg flex justify-start items-center">
 Target Count: 
 <input type="number" id="targetJapa" min="1" value="108" class="w-28 ml-2 p-2 border border-gray-300 rounded-lg text-center text-xl focus:ring-primary focus:border-primary transition duration-150">
 </div>
-<div id="tapArea" class="flex flex-col items-center justify-center select-none touch-manipulation cursor-pointer min-h-[55vh] border-4 border-dashed border-primary/20 rounded-xl bg-card-light/70 shadow-inner p-8">
+<div id="tapArea" class="flex flex-col items-center justify-center select-none touch-manipulation cursor-pointer min-h-[40vh] border-4 border-dashed border-primary/20 rounded-xl bg-card-light/70 shadow-inner p-8 text-center">
     <div class="text-8xl font-extrabold text-primary transition-all duration-150 ease-out" id="japaCount">0</div>
  
-    <p class="text-xl text-primary-dark mt-6 text-center">
+    <p class="text-xl text-primary-dark mt-6">
         <span class="text-4xl">👆</span> Tap the screen to count
     </p>
 </div>
-<div class="btn-group flex justify-center gap-4 flex-wrap mt-6">
+<div class="btn-group flex justify-start gap-4 flex-wrap mt-6">
     <button class="main-btn bg-primary text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-primary-dark transition-colors duration-150 w-full" id="resetJapa">🔄 Reset Current Count</button>
     <button class="main-btn bg-green-600 text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 w-full" id="addJapaLog">📘 Log Count and Reset</button>
 </div>
 </section>
 
 <section id="meditation">
-<h3 class="text-xl font-bold text-center text-primary mb-6">Meditation Timer</h3>
-<div class="mb-4 text-gray-700 text-lg flex justify-center items-center">
+<h3 class="text-xl font-bold text-black mb-6">Meditation Timer</h3>
+<div class="mb-4 text-black text-lg flex justify-start items-center">
 Target Time (Minutes): 
 <input type="number" id="presetMinutes" min="1" value="10" class="w-28 ml-2 p-2 border border-gray-300 rounded-lg text-center text-xl focus:ring-primary focus:border-primary transition duration-150">
 </div>
@@ -164,8 +201,8 @@ Target Time (Minutes):
 </section>
 
 <section id="log">
-<h3 class="text-xl font-bold text-center text-primary mb-6">Activity Log</h3>
-<div class="mb-4 text-gray-700 text-lg">
+<h3 class="text-xl font-bold text-black mb-6">Activity Log</h3>
+<div class="mb-4 text-black text-lg flex justify-start items-center">
 <label class="mr-2 font-medium text-lg">Show Period:</label>
 <select id="logRange" class="p-2 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary transition duration-150">
 <option value="7">Last 7 Days</option>
@@ -173,28 +210,32 @@ Target Time (Minutes):
 </select>
 </div>
 <ul id="logList" class="log-list list-none p-0 mt-4"></ul>
+
+<button id="resetData" class="main-btn bg-red-600 text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-red-700 transition-colors duration-150 w-full mt-6">
+    ⚠️ Reset All Saved Data
+</button>
+
 </section>
 
 <section id="notes">
-<h3 class="text-xl font-bold text-center text-primary mb-6">Reflection Notes</h3>
+<h3 class="text-xl font-bold text-black mb-6">Reflection Notes</h3>
 
 <section id="notes-list" class="flex flex-col gap-3 flex-grow">
-    <h3 class="text-lg font-semibold text-gray-700 mb-2">Saved Notes</h3>
     <ul id="note-items" class="list-none p-0 flex-grow"></ul>
     <button id="add-note-btn" class="notes-btn bg-primary-dark text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-primary transition-colors duration-150 text-lg">➕ Add New Note</button>
 </section>
 
 <section id="note-editor" style="display:none;" class="flex flex-col gap-3">
-    <input type="text" id="note-title" placeholder="Enter Note Title" required class="p-3 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary">
+    <input type="text" id="note-title" placeholder="Enter Note Title" required class="p-3 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary text-black">
     <textarea id="note-content-editor" class="min-h-[200px] text-lg"></textarea> 
     <button id="save-note-btn" class="notes-btn bg-green-600 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 text-lg">Save Note</button>
-    <button id="cancel-edit-btn" class="notes-btn bg-gray-300 text-gray-800 py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-400 text-lg">Cancel</button>
+    <button id="cancel-edit-btn" class="notes-btn bg-gray-300 text-black py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-400 text-lg">Cancel</button>
     <input type="hidden" id="current-note-id">
-</section>
+</section>x
 
 <section id="note-viewer" style="display:none;" class="flex flex-col gap-4">
-    <h2 id="view-title" class="text-2xl font-bold text-gray-800"></h2>
-    <div id="view-content" class="p-4 border border-gray-200 rounded-lg bg-white shadow-inner text-lg"></div>
+    <h2 id="view-title" class="text-2xl font-bold text-black"></h2>
+    <div id="view-content" class="p-4 border border-gray-200 rounded-lg bg-white shadow-inner text-lg text-black"></div>
     <button id="close-viewer-btn" class="notes-btn bg-gray-500 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-600 transition-colors duration-150 text-lg">Close</button>
 </section>
 </section>
@@ -238,7 +279,7 @@ const tapArea=document.getElementById("tapArea");
 
 let noteEditorInstance=null; 
 
-// ---------- Page Navigation ----------
+// ---------- Page Navigation (No functional change needed) ----------
 function showPage(id){
     document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
     
@@ -426,16 +467,18 @@ function updateLog(){
     const recent=logData.slice(-range).reverse(); 
     
     if (recent.length === 0) {
-         logList.innerHTML = '<li class="text-center text-gray-500 mt-5">No activities logged in this period.</li>';
-         return;
+          logList.innerHTML = '<li class="text-left text-black mt-5">No activities logged in this period.</li>';
+          return;
     }
     
     recent.forEach(r=>{
         const li=document.createElement("li"); 
-        li.className="bg-white p-4 mb-3 rounded-lg border-l-4 border-primary shadow-sm text-gray-800 text-lg flex justify-between items-center";
+        // Changed log item text color to black (text-black)
+        li.className="bg-white p-4 mb-3 rounded-lg border-l-4 border-primary shadow-sm text-black text-lg flex justify-between items-center";
         
         const dateSpan = `<span class="font-bold text-primary-dark">${r.date}</span>`;
-        const metricsDiv = `<div class="text-sm text-right">Japa: <span class="font-semibold">${r.japa}</span> times<br>Meditate: <span class="font-semibold">${r.meditation}</span> mins</div>`;
+        // Count numbers are preserved with text-primary-dark color
+        const metricsDiv = `<div class="text-sm text-right">Japa: <span class="font-semibold text-primary-dark">${r.japa}</span> times<br>Meditate: <span class="font-semibold text-primary-dark">${r.meditation}</span> mins</div>`;
         
         li.innerHTML=`${dateSpan}${metricsDiv}`; 
         logList.appendChild(li);
@@ -443,6 +486,27 @@ function updateLog(){
 }
 
 document.getElementById("logRange").addEventListener("change",updateLog);
+
+
+// ⭐ Reset Data Logic ⭐
+document.getElementById("resetData").onclick = () => {
+    if(confirm("⚠️ WARNING: This will permanently erase ALL stored Japa, Meditation logs, and Notes. Are you absolutely sure you want to proceed?")) {
+        localStorage.removeItem("japaMeditationLog");
+        localStorage.removeItem("japaCount");
+        localStorage.removeItem("notes");
+        
+        // Reset in-memory data
+        japaCount = 0;
+        logData = [];
+        
+        // Update UI
+        updateJapaDisplay();
+        updateDashboard();
+        updateLog();
+        alert("All data has been successfully reset.");
+        showPage('home');
+    }
+}
 
 // ---------- Notes Logic ----------
 document.addEventListener("DOMContentLoaded",function(){
@@ -486,7 +550,7 @@ document.addEventListener("DOMContentLoaded",function(){
         noteItemsUL.innerHTML=''; 
         
         if (notes.length === 0) {
-            noteItemsUL.innerHTML = '<li class="text-center text-gray-500 mt-5">No notes saved yet.</li>';
+            noteItemsUL.innerHTML = '<li class="text-left text-black mt-5">No notes saved yet.</li>';
         }
         
         saveNoteBtn.textContent = "Save Note"; 
@@ -494,9 +558,11 @@ document.addEventListener("DOMContentLoaded",function(){
         
         notes.forEach((note,i)=>{
             const li=document.createElement('li'); 
-            li.className='bg-white p-4 mb-3 rounded-lg flex justify-between items-center shadow-md text-gray-800 border-l-4 border-primary-light';
+            // Changed note item text color to black (text-black)
+            li.className='bg-white p-4 mb-3 rounded-lg flex justify-between items-center shadow-md text-black border-l-4 border-primary-light';
 
             const titleSpan=document.createElement('span'); 
+            // Hover color preserved as primary-dark
             titleSpan.className='note-title-text font-semibold text-lg cursor-pointer flex-grow hover:text-primary-dark transition-colors duration-150 truncate mr-4'; 
             titleSpan.textContent=note.title; 
             titleSpan.onclick=()=>viewNote(i); 
@@ -582,7 +648,8 @@ document.addEventListener("DOMContentLoaded",function(){
         const notes=loadNotes(); 
         viewTitle.textContent=notes[i].title; 
         viewContent.innerHTML=notes[i].content; 
-        viewContent.className = 'p-4 border border-gray-200 rounded-lg bg-white shadow-inner text-lg overflow-auto'; 
+        // Text color explicitly set to black here
+        viewContent.className = 'p-4 border border-gray-200 rounded-lg bg-white shadow-inner text-lg text-black overflow-auto'; 
     }
 
     addNoteBtn.onclick=()=>{
@@ -607,5 +674,4 @@ showPage('home'); // Ensure home is the initial active page after setup
 </script>
 
 </body>
-
 </html>
