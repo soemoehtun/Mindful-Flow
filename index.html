@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindful Flow: Japa & Meditation Tracker</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+    // New calming color theme: Deep Blue/Teal
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'primary': '#008080', // Teal
+                    'primary-dark': '#005f5f', // Dark Teal/Cyan
+                    'primary-light': '#00a0a0', // Light Teal
+                    'bg-light': '#f0f9ff', // Very light blue background
+                    'card-light': '#ffffff',
+                    'secondary-bg': '#e0f7fa', // Lightest Cyan background
+                },
+                fontFamily: {
+                    sans: ["Poppins", "Arial", "sans-serif"],
+                },
+            }
+        }
+    }
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+
+<style>
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f0f9ff;
+    color: #1a1a1a;
+    font-size: 1.125rem; 
+}
+
+section {
+    display: none;
+    flex: 1;
+    margin-bottom: 70px;
+    min-height: 100%;
+}
+section.active {
+    display: flex; 
+    flex-direction: column;
+    width: 100%;
+}
+
+.pulse {
+    transform: scale(1.1);
+    color: theme('colors.pink.500'); /* Changed pulse color for contrast */
+    text-shadow: 2px 2px 8px rgba(0, 128, 128, 0.5);
+}
+
+.dashboard-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s;
+    font-size: 1rem;
+}
+.dashboard-list-item:nth-child(even) {
+    background-color: theme('colors.secondary-bg');
+}
+.dashboard-list-item:hover {
+    background-color: theme('colors.cyan.100');
+}
+
+/* Ensure TinyMCE is fully visible */
+.tox-tinymce {
+    z-index: 99999 !important;
+}
+</style>
+</head>
+<body class="bg-bg-light text-gray-800 font-sans transition-colors duration-300">
+
+<header class="bg-primary text-white text-center py-4 text-2xl font-semibold relative shadow-lg">
+   Mindful Flow: Japa & Meditation Tracker
+</header>
+
+<main class="flex-grow p-4">
+
+<section id="home" class="active">
+<h3 class="text-xl font-bold text-gray-700 mt-0 mb-3 border-l-4 border-pink-500 pl-3">Today's Progress</h3>
+<div class="dashboard-list bg-white rounded-xl shadow-lg divide-y divide-gray-200 overflow-hidden mb-6">
+    
+    <div class="dashboard-list-item">
+        <div class="text-lg font-medium text-gray-700">Daily Japa Count</div>
+        <p id="dailyJapa" class="text-lg font-extrabold text-primary-dark">0 times</p>
+    </div>
+    
+    <div class="dashboard-list-item">
+        <div class="text-lg font-medium text-gray-700">Daily Meditation Time</div>
+        <p id="dailyMeditation" class="text-lg font-extrabold text-primary-dark">0 mins</p>
+    </div>
+    
+</div>
+
+<div class="mb-6"><hr class="border-gray-300"></div>
+
+<h3 class="text-xl font-bold text-gray-700 mt-4 mb-3 border-l-4 border-primary pl-3">Cumulative Records</h3>
+<div class="dashboard-list bg-white rounded-xl shadow-lg divide-y divide-gray-200 overflow-hidden">
+    
+    <div class="dashboard-list-item">
+        <div class="text-lg font-medium text-gray-700">Total Japa Completed</div>
+        <p id="totalJapa" class="text-lg font-extrabold text-primary-dark">0 times</p>
+    </div>
+    
+    <div class="dashboard-list-item">
+        <div class="text-lg font-medium text-gray-700">Total Meditation Time</div>
+        <p id="totalMeditation" class="text-lg font-extrabold text-primary-dark">0 mins</p>
+    </div>
+    
+    <div class="dashboard-list-item">
+        <div class="text-lg font-medium text-gray-700">Total Saved Notes</div>
+        <p id="notesCount" class="text-lg font-extrabold text-primary-dark">0 notes</p>
+    </div>
+    
+</div>
+
+</section>
+
+<section id="japa">
+<h3 class="text-xl font-bold text-center text-primary mb-6">Japa (Mantra Counting)</h3>
+<div class="mb-4 text-gray-700 text-lg flex justify-center items-center">
+Target Count: 
+<input type="number" id="targetJapa" min="1" value="108" class="w-28 ml-2 p-2 border border-gray-300 rounded-lg text-center text-xl focus:ring-primary focus:border-primary transition duration-150">
+</div>
+<div id="tapArea" class="flex flex-col items-center justify-center select-none touch-manipulation cursor-pointer min-h-[55vh] border-4 border-dashed border-primary/20 rounded-xl bg-card-light/70 shadow-inner p-8">
+    <div class="text-8xl font-extrabold text-primary transition-all duration-150 ease-out" id="japaCount">0</div>
+ 
+    <p class="text-xl text-primary-dark mt-6 text-center">
+        <span class="text-4xl">👆</span> Tap the screen to count
+    </p>
+</div>
+<div class="btn-group flex justify-center gap-4 flex-wrap mt-6">
+    <button class="main-btn bg-primary text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-primary-dark transition-colors duration-150 w-full" id="resetJapa">🔄 Reset Current Count</button>
+    <button class="main-btn bg-green-600 text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 w-full" id="addJapaLog">📘 Log Count and Reset</button>
+</div>
+</section>
+
+<section id="meditation">
+<h3 class="text-xl font-bold text-center text-primary mb-6">Meditation Timer</h3>
+<div class="mb-4 text-gray-700 text-lg flex justify-center items-center">
+Target Time (Minutes): 
+<input type="number" id="presetMinutes" min="1" value="10" class="w-28 ml-2 p-2 border border-gray-300 rounded-lg text-center text-xl focus:ring-primary focus:border-primary transition duration-150">
+</div>
+<div class="text-7xl font-extrabold text-primary text-center mt-8 mb-6" id="timer">00:00</div>
+<div class="btn-group grid grid-cols-2 gap-3 mt-4">
+    <button class="main-btn bg-primary text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-primary-dark transition-colors duration-150 text-lg" id="startMeditation">Start</button>
+    <button class="main-btn bg-yellow-600 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-yellow-700 transition-colors duration-150 text-lg" id="pauseMeditation">Pause</button>
+    <button class="main-btn bg-gray-500 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-600 transition-colors duration-150 text-lg" id="resetMeditation">Reset</button>
+    <button class="main-btn bg-green-600 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 text-lg" id="addMeditationLog">Log Record</button>
+</div>
+</section>
+
+<section id="log">
+<h3 class="text-xl font-bold text-center text-primary mb-6">Activity Log</h3>
+<div class="mb-4 text-gray-700 text-lg">
+<label class="mr-2 font-medium text-lg">Show Period:</label>
+<select id="logRange" class="p-2 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary transition duration-150">
+<option value="7">Last 7 Days</option>
+<option value="30">Last 30 Days</option>
+</select>
+</div>
+<ul id="logList" class="log-list list-none p-0 mt-4"></ul>
+</section>
+
+<section id="notes">
+<h3 class="text-xl font-bold text-center text-primary mb-6">Reflection Notes</h3>
+
+<section id="notes-list" class="flex flex-col gap-3 flex-grow">
+    <h3 class="text-lg font-semibold text-gray-700 mb-2">Saved Notes</h3>
+    <ul id="note-items" class="list-none p-0 flex-grow"></ul>
+    <button id="add-note-btn" class="notes-btn bg-primary-dark text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-primary transition-colors duration-150 text-lg">➕ Add New Note</button>
+</section>
+
+<section id="note-editor" style="display:none;" class="flex flex-col gap-3">
+    <input type="text" id="note-title" placeholder="Enter Note Title" required class="p-3 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary">
+    <textarea id="note-content-editor" class="min-h-[200px] text-lg"></textarea> 
+    <button id="save-note-btn" class="notes-btn bg-green-600 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 text-lg">Save Note</button>
+    <button id="cancel-edit-btn" class="notes-btn bg-gray-300 text-gray-800 py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-400 text-lg">Cancel</button>
+    <input type="hidden" id="current-note-id">
+</section>
+
+<section id="note-viewer" style="display:none;" class="flex flex-col gap-4">
+    <h2 id="view-title" class="text-2xl font-bold text-gray-800"></h2>
+    <div id="view-content" class="p-4 border border-gray-200 rounded-lg bg-white shadow-inner text-lg"></div>
+    <button id="close-viewer-btn" class="notes-btn bg-gray-500 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-600 transition-colors duration-150 text-lg">Close</button>
+</section>
+</section>
+
+</main>
+
+<nav class="flex justify-around bg-white shadow-2xl fixed bottom-0 w-full p-2 z-50 text-lg">
+    <button class="text-primary hover:text-primary-dark transition-colors duration-150 p-2 flex flex-col items-center focus:outline-none" onclick="showPage('home')">
+        <i class="fas fa-tachometer-alt text-xl mb-1"></i>
+        <span class="text-xs">Home</span>
+    </button>
+    <button class="text-primary hover:text-primary-dark transition-colors duration-150 p-2 flex flex-col items-center focus:outline-none" onclick="showPage('japa')">
+        <i class="fas fa-praying-hands text-xl mb-1"></i>
+        <span class="text-xs">Japa</span>
+    </button>
+    <button class="text-primary hover:text-primary-dark transition-colors duration-150 p-2 flex flex-col items-center focus:outline-none" onclick="showPage('meditation')">
+        <i class="fas fa-spa text-xl mb-1"></i>
+        <span class="text-xs">Meditate</span>
+    </button>
+    <button class="text-primary hover:text-primary-dark transition-colors duration-150 p-2 flex flex-col items-center focus:outline-none" onclick="showPage('log')">
+        <i class="fas fa-book text-xl mb-1"></i>
+        <span class="text-xs">Log</span>
+    </button>
+    <button class="text-primary hover:text-primary-dark transition-colors duration-150 p-2 flex flex-col items-center focus:outline-none" onclick="showPage('notes')">
+        <i class="fas fa-sticky-note text-xl mb-1"></i>
+        <span class="text-xs">Notes</span>
+    </button>
+</nav>
+
+
+<script>
+// ---------- Global Vars and DOM Elements ----------
+let japaCount=parseInt(localStorage.getItem("japaCount")||0);
+let seconds=0,timer=null;
+let meditationDuration=0;
+let logData=JSON.parse(localStorage.getItem("japaMeditationLog")||"[]");
+
+const japaDisplay=document.getElementById("japaCount");
+const timerDisplay=document.getElementById("timer");
+const tapArea=document.getElementById("tapArea");
+
+let noteEditorInstance=null; 
+
+// ---------- Page Navigation ----------
+function showPage(id){
+    document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+    
+    // Update navigation button styles
+    document.querySelectorAll('nav button').forEach(btn => {
+        const icon = btn.querySelector('i');
+        const span = btn.querySelector('span');
+        const isActive = btn.onclick.toString().includes(`showPage('${id}')`);
+        
+        // Remove 'text-primary-dark' from all, add 'text-primary'
+        btn.classList.remove('text-primary-dark');
+        btn.classList.add('text-primary');
+
+        if (isActive) {
+            // Highlight active button
+            btn.classList.add('text-primary-dark');
+        }
+    });
+
+    document.getElementById(id).classList.add("active");
+    
+    // Handle TinyMCE removal when leaving notes
+    if (id !== 'notes' && noteEditorInstance) {
+        tinymce.get('note-content-editor')?.remove();
+        noteEditorInstance = null;
+    }
+    
+    if(id==="home") updateDashboard();
+    if(id==="log") updateLog();
+    
+    if(id==="notes") {
+        const notesListSection = document.getElementById("notes-list");
+        const noteEditor = document.getElementById("note-editor");
+        const noteViewer = document.getElementById("note-viewer");
+
+        // Ensure the default view is the list view
+        noteEditor.style.display = 'none';
+        noteViewer.style.display = 'none';
+        notesListSection.style.display = 'flex';
+        
+        tinymce.get('note-content-editor')?.remove();
+        noteEditorInstance = null;
+        
+        document.getElementById("save-note-btn").textContent = "Save Note"; 
+        document.getElementById("current-note-id").value = ""; 
+        
+        renderNotes();
+    }
+}
+
+
+// --- Utility Functions (Logging, Japa, Meditation) ---
+function getDailyStatus() {
+    // Get date in a simple format for storage key
+    const today = new Date().toLocaleDateString();
+    const record = logData.find(r => r.date === today);
+    return {
+        japa: record ? record.japa : 0,
+        meditation: record ? record.meditation : 0
+    };
+}
+
+function updateDashboard(){
+    const totalJapa=logData.reduce((a,r)=>a+r.japa,0);
+    const totalMeditation=logData.reduce((a,r)=>a+r.meditation,0);
+    const notesCount=(JSON.parse(localStorage.getItem('notes')||'[]')).length;
+    const dailyStatus = getDailyStatus();
+    
+    document.getElementById("totalJapa").textContent=totalJapa+' times';
+    document.getElementById("totalMeditation").textContent=totalMeditation+' mins';
+    document.getElementById("notesCount").textContent=notesCount+' notes';
+    
+    document.getElementById("dailyJapa").textContent=dailyStatus.japa+' times';
+    document.getElementById("dailyMeditation").textContent=dailyStatus.meditation + ' mins';
+}
+
+// Japa Handlers
+document.getElementById("resetJapa").onclick=()=>{if(confirm("Are you sure you want to reset the current Japa count?")){japaCount=0;updateJapaDisplay();}};
+document.getElementById("addJapaLog").onclick=()=>{
+    if (japaCount > 0) {
+        saveLog(japaCount, 0); 
+        japaCount=0; 
+        updateJapaDisplay();
+        alert("Japa count logged successfully!");
+    } else {
+        alert("Current Japa count is zero. Nothing to log.");
+    }
+};
+
+// Meditation Handlers
+document.getElementById("startMeditation").onclick=()=>{
+    // Prevent starting a new interval if one is already running
+    if(timer) return; 
+    
+    let mins=parseInt(document.getElementById("presetMinutes").value)||10; 
+    
+    meditationDuration=mins; 
+    seconds=mins*60;
+    
+    updateTimer(); // Display initial time
+    
+    timer=setInterval(()=>{
+        seconds--; 
+        updateTimer(); 
+        if(seconds<=0){
+            clearInterval(timer); 
+            timer=null; 
+            alert(`Meditation time of ${meditationDuration} minutes is complete! Please log your record.`);
+        }
+    },1000);
+};
+
+document.getElementById("pauseMeditation").onclick=()=>{
+    if(timer) {
+        clearInterval(timer); 
+        timer=null;
+        alert("Meditation paused.");
+    }
+};
+document.getElementById("resetMeditation").onclick=()=>{
+    clearInterval(timer); 
+    timer=null; 
+    seconds=0; 
+    meditationDuration=0;
+    updateTimer();
+};
+document.getElementById("addMeditationLog").onclick=()=>{
+    if (meditationDuration > 0) {
+        // Log the *preset* duration as per original code logic
+        saveLog(0, meditationDuration); 
+        meditationDuration=0; 
+        seconds=0; 
+        updateTimer();
+        alert("Meditation time logged successfully!");
+    } else {
+         alert("Please start a meditation session before logging.");
+    }
+};
+
+// Display japa count
+function updateJapaDisplay(){ japaDisplay.textContent=japaCount; }
+
+// Display timer
+function updateTimer(){
+    let m=Math.floor(seconds/60);
+    let s=seconds%60;
+    timerDisplay.textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+// Japa Tap Logic
+function handleTap(e){
+    e.preventDefault();
+    const target = parseInt(document.getElementById("targetJapa").value) || 108;
+
+    japaCount++; 
+    updateJapaDisplay();
+    japaDisplay.classList.add('pulse'); 
+    setTimeout(()=> japaDisplay.classList.remove('pulse'),150);
+
+    // Check for Target Completion
+    if (japaCount === target) {
+        alert(`Congratulations! Japa count of ${target} is complete!`);
+    }
+}
+
+tapArea.addEventListener("mousedown",handleTap);
+tapArea.addEventListener("touchstart",handleTap);
+
+function saveLog(japa,meditation){
+    const date=new Date().toLocaleDateString();
+    let record=logData.find(r=>r.date===date);
+    if(!record){record={date,japa:0,meditation:0}; logData.push(record);}
+    record.japa+=japa; record.meditation+=meditation;
+    localStorage.setItem("japaMeditationLog",JSON.stringify(logData));
+    localStorage.setItem("japaCount",japaCount);
+    updateDashboard();
+    updateLog();
+}
+
+function updateLog(){
+    const range=parseInt(document.getElementById("logRange")?.value||7);
+    const logList=document.getElementById("logList");
+    logList.innerHTML="";
+    // Get the last 'range' number of entries and reverse them for newest first
+    const recent=logData.slice(-range).reverse(); 
+    
+    if (recent.length === 0) {
+         logList.innerHTML = '<li class="text-center text-gray-500 mt-5">No activities logged in this period.</li>';
+         return;
+    }
+    
+    recent.forEach(r=>{
+        const li=document.createElement("li"); 
+        li.className="bg-white p-4 mb-3 rounded-lg border-l-4 border-primary shadow-sm text-gray-800 text-lg flex justify-between items-center";
+        
+        const dateSpan = `<span class="font-bold text-primary-dark">${r.date}</span>`;
+        const metricsDiv = `<div class="text-sm text-right">Japa: <span class="font-semibold">${r.japa}</span> times<br>Meditate: <span class="font-semibold">${r.meditation}</span> mins</div>`;
+        
+        li.innerHTML=`${dateSpan}${metricsDiv}`; 
+        logList.appendChild(li);
+    });
+}
+
+document.getElementById("logRange").addEventListener("change",updateLog);
+
+// ---------- Notes Logic ----------
+document.addEventListener("DOMContentLoaded",function(){
+    const noteItemsUL=document.getElementById("note-items");
+    const notesListSection=document.getElementById("notes-list");
+    const noteEditor=document.getElementById("note-editor");
+    const noteViewer=document.getElementById("note-viewer");
+    const addNoteBtn=document.getElementById("add-note-btn");
+    const saveNoteBtn=document.getElementById("save-note-btn");
+    const cancelEditBtn=document.getElementById("cancel-edit-btn");
+    const closeViewerBtn=document.getElementById("close-viewer-btn");
+    const noteTitleInput=document.getElementById("note-title");
+    const currentNoteIdInput=document.getElementById("current-note-id");
+    const viewTitle=document.getElementById("view-title");
+    const viewContent=document.getElementById("view-content");
+    
+    function initEditor(content=''){ 
+        tinymce.get('note-content-editor')?.remove();
+        noteEditorInstance = null; 
+        
+        tinymce.init({
+            selector:'#note-content-editor',
+            height:300,
+            menubar:false,
+            plugins:['lists','link','autoresize'],
+            toolbar:'undo redo | bold italic underline | bullist numlist | link',
+            setup: editor=>{
+                noteEditorInstance=editor; 
+                editor.on('init', ()=>{
+                    editor.setContent(content);
+                });
+            }
+        });
+    }
+
+    function loadNotes(){return JSON.parse(localStorage.getItem('notes')||'[]');}
+    function saveNotes(notes){localStorage.setItem('notes',JSON.stringify(notes));}
+    
+    function renderNotes(){
+        const notes=loadNotes(); 
+        noteItemsUL.innerHTML=''; 
+        
+        if (notes.length === 0) {
+            noteItemsUL.innerHTML = '<li class="text-center text-gray-500 mt-5">No notes saved yet.</li>';
+        }
+        
+        saveNoteBtn.textContent = "Save Note"; 
+        currentNoteIdInput.value = ""; 
+        
+        notes.forEach((note,i)=>{
+            const li=document.createElement('li'); 
+            li.className='bg-white p-4 mb-3 rounded-lg flex justify-between items-center shadow-md text-gray-800 border-l-4 border-primary-light';
+
+            const titleSpan=document.createElement('span'); 
+            titleSpan.className='note-title-text font-semibold text-lg cursor-pointer flex-grow hover:text-primary-dark transition-colors duration-150 truncate mr-4'; 
+            titleSpan.textContent=note.title; 
+            titleSpan.onclick=()=>viewNote(i); 
+            
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'flex gap-2 ml-4 flex-shrink-0';
+
+            const editBtn=document.createElement('button'); 
+            editBtn.className='edit-btn bg-blue-500 text-white py-2 px-3 rounded-md text-sm hover:bg-blue-600 transition-colors duration-150'; 
+            editBtn.textContent='Edit'; 
+            editBtn.onclick=()=>editNote(i); 
+            
+            const delBtn=document.createElement('button'); 
+            delBtn.className='delete-btn bg-red-500 text-white py-2 px-3 rounded-md text-sm hover:bg-red-600 transition-colors duration-150'; 
+            delBtn.textContent='Delete'; 
+            delBtn.onclick=()=>deleteNote(i); 
+            
+            li.appendChild(titleSpan); 
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(delBtn);
+            li.appendChild(actionsDiv);
+            noteItemsUL.appendChild(li);
+        }); 
+        updateDashboard();
+    }
+
+    function showEditor(content=''){
+        initEditor(content); 
+        
+        notesListSection.style.display='none'; 
+        noteViewer.style.display='none'; 
+        noteEditor.style.display='flex'; 
+        
+        setTimeout(() => {
+            noteEditorInstance?.focus();
+        }, 300);
+    }
+    
+    function showList(){
+        noteEditor.style.display='none'; 
+        notesListSection.style.display='flex'; 
+        noteViewer.style.display='none'; 
+        renderNotes(); 
+        
+        tinymce.get('note-content-editor')?.remove();
+        noteEditorInstance=null;
+    }
+
+    function saveNote(){
+        const title=noteTitleInput.value.trim(); 
+        const content = noteEditorInstance ? noteEditorInstance.getContent() : ''; 
+        
+        if(title===''){alert('Please enter a title for your note.'); return;} 
+        
+        const notes=loadNotes(); 
+        const idx=currentNoteIdInput.value; 
+        
+        if(idx===''){
+            notes.unshift({title,content, date: new Date().toLocaleDateString()}); // Add to start
+        } else {
+            notes[idx].title=title;
+            notes[idx].content=content;
+            notes[idx].date=new Date().toLocaleDateString();
+        } 
+        saveNotes(notes); 
+        showList();
+    }
+
+    function editNote(i){
+        const notes=loadNotes(); 
+        noteTitleInput.value=notes[i].title; 
+        currentNoteIdInput.value=i; 
+        saveNoteBtn.textContent = "Save Edited Note"; 
+        showEditor(notes[i].content);
+    }
+
+    function deleteNote(i){if(confirm('Are you sure you want to delete this note? This action cannot be undone.')){let notes=loadNotes(); notes.splice(i,1); saveNotes(notes); renderNotes();}}
+    function viewNote(i){
+        notesListSection.style.display='none'; 
+        noteEditor.style.display='none'; 
+        noteViewer.style.display='flex'; 
+        
+        const notes=loadNotes(); 
+        viewTitle.textContent=notes[i].title; 
+        viewContent.innerHTML=notes[i].content; 
+        viewContent.className = 'p-4 border border-gray-200 rounded-lg bg-white shadow-inner text-lg overflow-auto'; 
+    }
+
+    addNoteBtn.onclick=()=>{
+        noteTitleInput.value='';
+        currentNoteIdInput.value='';
+        saveNoteBtn.textContent = "Save Note";
+        showEditor();
+    }
+    saveNoteBtn.onclick=saveNote;
+    cancelEditBtn.onclick=showList;
+    closeViewerBtn.onclick=showList;
+
+    renderNotes();
+});
+
+// ---------- Initialize Application ----------
+updateDashboard();
+updateJapaDisplay();
+updateTimer();
+updateLog();
+showPage('home'); // Ensure home is the initial active page after setup
+</script>
+
+</body>
+</html>
