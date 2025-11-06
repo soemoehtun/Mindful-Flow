@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mindful Flow:Tracker</title>
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="./manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
@@ -74,17 +71,14 @@ main {
 section {
     display: none;
     flex: 1;
+    /* Removed the old margin-bottom since main has padding-bottom */
+    /* margin-bottom: 70px; */ 
     min-height: 100%;
 }
 section.active {
     display: flex; 
     flex-direction: column;
     width: 100%;
-}
-
-/* New: Ensure note editor section grows to fill space */
-#notes section {
-    flex-grow: 1;
 }
 
 .pulse {
@@ -113,11 +107,6 @@ section.active {
 .tox-tinymce {
     z-index: 99999 !important;
 }
-/* New: Set TinyMCE to take full available space within the flex container */
-#note-editor .tox-editor-container {
-    flex-grow: 1; /* Allows editor to fill height */
-}
-
 
 /* MODIFICATION 5: Fixed bottom nav needs bottom safe area inset */
 nav {
@@ -237,9 +226,9 @@ Target Time (Minutes):
     <ul id="note-items" class="list-none p-0 flex-grow"></ul>
 </section>
 
-<section id="note-editor" style="display:none;" class="flex flex-col gap-3 flex-grow"> 
+<section id="note-editor" style="display:none;" class="flex flex-col gap-3">
     <input type="text" id="note-title" placeholder="Enter Note Title" required class="p-3 border border-gray-300 rounded-lg text-lg focus:ring-primary focus:border-primary text-black">
-    <textarea id="note-content-editor" class="text-lg"></textarea> 
+    <textarea id="note-content-editor" class="min-h-[200px] text-lg"></textarea> 
     <button id="save-note-btn" class="notes-btn bg-green-600 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 text-lg">Save Note</button>
     <button id="cancel-edit-btn" class="notes-btn bg-gray-300 text-black py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-400 text-lg">Cancel</button>
     <input type="hidden" id="current-note-id">
@@ -539,25 +528,9 @@ document.addEventListener("DOMContentLoaded",function(){
         tinymce.get('note-content-editor')?.remove();
         noteEditorInstance = null; 
         
-        // --- Calculate Height Dynamically for Full-Screen Effect ---
-        // Get the height of the elements that AREN'T the editor in the note-editor section
-        const noteEditorContainer = document.getElementById('note-editor');
-        const titleHeight = document.getElementById('note-title').offsetHeight;
-        const saveButtonHeight = document.getElementById('save-note-btn').offsetHeight;
-        const cancelButtonHeight = document.getElementById('cancel-edit-btn').offsetHeight;
-        
-        // Total fixed height (Title + two buttons + gaps (3 * 0.75rem for gap-3 in rem or ~48px) + padding)
-        const fixedElementsHeight = titleHeight + saveButtonHeight + cancelButtonHeight + 65; // Approximate fixed pixel buffer for padding/margins/gaps.
-        
-        // Calculate the height the editor should take (Note Editor container height - fixed elements height)
-        // Since main is scrollable, we use innerHeight of the main container and subtract other elements
-        const availableHeight = noteEditorContainer.parentElement.offsetHeight - fixedElementsHeight;
-        // Set minimum of 300px just in case calculation is off.
-        const editorHeight = Math.max(300, availableHeight); 
-
         tinymce.init({
             selector:'#note-content-editor',
-            height: editorHeight, // Use calculated dynamic height
+            height:300,
             menubar:false,
             plugins:['lists','link','autoresize'],
             toolbar:'undo redo | bold italic underline | bullist numlist | link',
