@@ -53,19 +53,20 @@ body {
     overflow: hidden; 
 }
 
-/* MODIFICATION 3: Apply safe area insets to header */
+/* 🟢 HEADER HEIGHT REDUCTION */
 header {
-    /* Padding for the top status bar/notch */
-    padding-top: calc(1rem + env(safe-area-inset-top)); 
-    padding-bottom: 1rem;
+    /* Reduced top padding from 1rem to 0.75rem for a lower height */
+    padding-top: calc(0.75rem + env(safe-area-inset-top)); 
+    /* Reduced bottom padding from 1rem to 0.75rem */
+    padding-bottom: 0.75rem; 
 }
 
-/* MODIFICATION 4: Make main content scrollable and manage layout */
+/* 🟢 MAIN CONTENT PADDING ADJUSTMENT */
 main {
     flex-grow: 1;
     overflow-y: auto; /* Allows content within main to scroll */
     -webkit-overflow-scrolling: touch; /* Improved scrolling on iOS */
-    padding-bottom: 5rem; /* Ensure space above the fixed nav */
+    padding-bottom: 4rem; /* REDUCED from 5rem to account for shorter nav footer */
 }
 
 section {
@@ -110,7 +111,7 @@ section.active {
 
 /* MODIFICATION 5: Fixed bottom nav needs bottom safe area inset */
 nav {
-    /* REDUCED BASE PADDING FOR LOWER HEIGHT */
+    /* Reduced the safe area padding base to match the smaller size */
     padding-bottom: calc(0.25rem + env(safe-area-inset-bottom)) !important; 
 }
 
@@ -232,7 +233,7 @@ Target Time (Minutes):
     <button id="save-note-btn" class="notes-btn bg-green-600 text-white py-3 px-4 rounded-lg font-medium shadow-md hover:bg-green-700 transition-colors duration-150 text-lg">Save Note</button>
     <button id="cancel-edit-btn" class="notes-btn bg-gray-300 text-black py-3 px-4 rounded-lg font-medium shadow-md hover:bg-gray-400 text-lg">Cancel</button>
     <input type="hidden" id="current-note-id">
-</section>x
+</section>
 
 <section id="note-viewer" style="display:none;" class="flex flex-col gap-4">
     <h2 id="view-title" class="text-2xl font-bold text-black"></h2>
@@ -416,7 +417,7 @@ document.getElementById("addMeditationLog").onclick=()=>{
         updateTimer();
         alert("Meditation time logged successfully!");
     } else {
-        alert("Please start a meditation session before logging.");
+         alert("Please start a meditation session before logging.");
     }
 };
 
